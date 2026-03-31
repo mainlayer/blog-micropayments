@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ post.title }} — Mainlayer Blog</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+    h1 { font-size: 2rem; line-height: 1.3; }
+    .meta { color: #888; font-size: 0.9rem; margin-bottom: 2rem; }
+    .content { line-height: 1.8; font-size: 1.05rem; white-space: pre-wrap; }
+    .paywall { background: linear-gradient(to bottom, rgba(255,255,255,0), #fff); height: 6rem; margin-top: -6rem; position: relative; }
+    .paywall-box { border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; text-align: center; margin-top: 1rem; }
+    .paywall-box p { color: #555; }
+    .cta { display: inline-block; background: #6366f1; color: #fff; text-decoration: none; padding: 0.6rem 1.4rem; border-radius: 6px; font-size: 0.95rem; margin-top: 0.5rem; }
+    a.back { color: #6366f1; text-decoration: none; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <a class="back" href="/">← All posts</a>
+  <h1>{{ post.title }}</h1>
+  <div class="meta">By {{ post.author }} &nbsp;·&nbsp; {{ post.published_at[:10] }} &nbsp;·&nbsp; {{ post.read_time_minutes }} min read</div>
+
+  {% if post.content %}
+    <div class="content">{{ post.content }}</div>
+  {% else %}
+    <div class="content">{{ post.preview }}</div>
+    <div class="paywall"></div>
+    <div class="paywall-box">
+      <strong>This post costs $0.01 to read in full.</strong>
+      <p>Pass your <code>X-Mainlayer-Token</code> header to the API, or get a token below.</p>
+      <a class="cta" href="https://mainlayer.fr">Get access at mainlayer.fr →</a>
+    </div>
+  {% endif %}
+</body>
+</html>

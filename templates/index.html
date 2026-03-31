@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mainlayer Blog</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+    h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+    .subtitle { color: #666; margin-bottom: 2rem; }
+    .post-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+    .post-card h2 { margin: 0 0 0.5rem; font-size: 1.2rem; }
+    .post-card h2 a { text-decoration: none; color: #1a1a1a; }
+    .post-card h2 a:hover { color: #6366f1; }
+    .meta { font-size: 0.85rem; color: #888; margin-bottom: 0.75rem; }
+    .preview { color: #444; font-size: 0.95rem; line-height: 1.6; }
+    .tags span { background: #f3f4f6; border-radius: 4px; padding: 2px 8px; font-size: 0.8rem; margin-right: 4px; }
+    .cost-badge { background: #ecfdf5; color: #065f46; border-radius: 4px; padding: 2px 8px; font-size: 0.8rem; font-weight: 600; }
+    .cta { background: #6366f1; color: #fff; text-decoration: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; }
+    footer { margin-top: 3rem; text-align: center; color: #aaa; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <h1>Mainlayer Blog</h1>
+  <p class="subtitle">Insights on AI agents, payments, and the data economy. Each post costs $0.01 — humans and agents welcome.</p>
+
+  {% for post in posts %}
+  <div class="post-card">
+    <h2><a href="/posts/{{ post.id }}">/posts/{{ post.id }} — {{ post.title }}</a></h2>
+    <div class="meta">
+      By {{ post.author }} &nbsp;·&nbsp; {{ post.published_at[:10] }}
+      &nbsp;·&nbsp; {{ post.read_time_minutes }} min read
+      &nbsp;·&nbsp; <span class="cost-badge">$0.01</span>
+    </div>
+    <div class="tags">
+      {% for tag in post.tags %}<span>{{ tag }}</span>{% endfor %}
+    </div>
+    <p class="preview">{{ post.preview }}…</p>
+  </div>
+  {% endfor %}
+
+  <p style="text-align:center; margin-top:2rem;">
+    <a class="cta" href="https://mainlayer.fr">Get an access token →</a>
+  </p>
+
+  <footer>Powered by <a href="https://mainlayer.fr">Mainlayer</a></footer>
+</body>
+</html>
