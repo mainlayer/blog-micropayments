@@ -174,19 +174,42 @@ def _make_post(raw: dict, include_content: bool = False) -> Post:
 # ---------------------------------------------------------------------------
 
 async def require_payment(x_mainlayer_token: str = Header(...)):
-    """Verify Mainlayer payment token; raise 402 if not authorised."""
-    access = await ml.resources.verify_access(RESOURCE_ID, x_mainlayer_token)
-    if not access.authorized:
+    """Verify Mainlayer payment token; raise 402 if not authorized.
+
+    Implements error handling and timeout protection.
+    Returns the access object if authorization succeeds.
+    """
+    if not x_mainlayer_token or not x_mainlayer_token.strip():
         raise HTTPException(
             status_code=402,
+            detail=PaymentRequiredResponse(
+                resource_id=RESOURCE_ID,
+                cost_usdc=0.01,
+            ).model_dump(),
+        )
+
+    try:
+        access = await ml.resources.verify_access(RESOURCE_ID, x_mainlayer_token)
+        if not access.authorized:
+            raise HTTPException(
+                status_code=402,
+                detail=PaymentRequiredResponse(
+                    resource_id=RESOURCE_ID,
+                    cost_usdc=0.01,
+                ).model_dump(),
+            )
+        return access
+    except Exception as err:
+        # Network or API error — fail closed
+        import logging
+        logging.warning("Payment verification error: %s", str(err))
+        raise HTTPException(
+            status_code=503,
             detail={
-                "error": "payment_required",
-                "message": "This post costs $0.01 to read. Get a token at mainlayer.fr",
-                "cost_usd": 0.01,
-                "payment_url": "https://mainlayer.fr",
+                "error": "service_unavailable",
+                "message": "Payment verification temporarily unavailable. Please retry.",
             },
         )
-    return access
 
 
 # ---------------------------------------------------------------------------
@@ -214,25 +237,19 @@ async def list_posts():
     responses={
         402: {"model": PaymentRequiredResponse, "description": "Payment required"},
         404: {"description": "Post not found"},
+        503: {"description": "Payment service unavailable"},
     },
 )
-async def get_post(post_id: int, x_mainlayer_token: str = Header(...)):
-    """Retrieve full post content. Requires a valid Mainlayer payment token."""
+async def get_post(post_id: int, access: any = require_payment()):
+    """
+    Retrieve full post content. Requires a valid Mainlayer payment token.
+
+    The payment token is verified before the route handler executes.
+    Returns 402 if payment is not authorized, 503 if verification fails.
+    """
     raw = next((p for p in _POSTS if p["id"] == post_id), None)
     if raw is None:
         raise HTTPException(status_code=404, detail="Post not found")
-
-    access = await ml.resources.verify_access(RESOURCE_ID, x_mainlayer_token)
-    if not access.authorized:
-        raise HTTPException(
-            status_code=402,
-            detail={
-                "error": "payment_required",
-                "message": "This post costs $0.01 to read. Get a token at mainlayer.fr",
-                "cost_usd": 0.01,
-                "payment_url": "https://mainlayer.fr",
-            },
-        )
 
     return _make_post(raw, include_content=True)
 

@@ -37,5 +37,7 @@ class PostsListResponse(BaseModel):
 class PaymentRequiredResponse(BaseModel):
     error: str = "payment_required"
     message: str = "This post requires payment. Get a token at mainlayer.fr"
-    cost_usd: float = 0.01
-    payment_url: str = "https://mainlayer.fr"
+    cost_usdc: float = Field(0.01, description="Price in USDC")
+    payment_url: str = "https://api.mainlayer.fr/pay"
+    resource_id: str = Field(..., description="Mainlayer resource ID for this post")
+    retry_after_seconds: int = Field(5, description="Suggested retry delay")
